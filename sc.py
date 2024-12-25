@@ -1,23 +1,30 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import time
 
 # تابع برای استخراج اطلاعات از هر پست
 def get_post_data(url):
-    # هدرهای HTTP برای شبیه‌سازی درخواست از مرورگر
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64'
-    }
+    # تنظیمات برای استفاده از مرورگر Chrome بدون نمایش آن (headless)
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')  # اجرای مرورگر در پس‌زمینه
+    chrome_options.add_argument('--no-sandbox')  # رفع مشکلات در محیط‌های محدود
+    chrome_options.add_argument('--disable-dev-shm-usage')  # رفع مشکلات در محیط‌های محدود
+    chrome_options.add_argument('--disable-gpu')  # غیرفعال کردن پردازش گرافیکی
+    chrome_options.add_argument('--disable-software-rasterizer')  # غیرفعال کردن رندر نرم‌افزاری
 
-    # ارسال درخواست HTTP به URL با هدرهای مشخص شده
-    response = requests.get(url, headers=headers)
-    
-    # بررسی وضعیت درخواست
-    if response.status_code != 200:
-        print(f"Error loading page: {url} (Status code: {response.status_code})")
-        return None
+    # استفاده از WebDriver برای مدیریت خودکار مرورگر
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver.get("https://www.cointelegraph.com/tags/nft")  # URL سایت  # باز کردن صفحه وب
 
-    # پارس کردن محتویات صفحه با BeautifulSoup
-    soup = BeautifulSoup(response.text, 'html.parser')
+    # اضافه کردن تاخیر برای اطمینان از بارگذاری کامل صفحه
+    time.sleep(3)  # می‌توانید زمان را بیشتر کنید اگر صفحه سنگین است
+
+    # پارس کردن محتوای صفحه با BeautifulSoup
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
 
     # پیدا کردن تمامی تگ‌های <li> که دارای data-testid="posts-listing__item" هستند
     posts = soup.find_all('li', {'data-testid': 'posts-listing__item'})
@@ -47,6 +54,9 @@ def get_post_data(url):
             'date': date,
             'image_url': image_url
         })
+
+    # بستن مرورگر
+    driver.quit()
 
     return post_data
 
