@@ -1,76 +1,50 @@
+# from requests import request
+from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import time
+import requests
 
-# تابع برای استخراج اطلاعات از هر پست
-def get_post_data(url):
-    # تنظیمات برای استفاده از مرورگر Chrome بدون نمایش آن (headless)
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')  # اجرای مرورگر در پس‌زمینه
-    chrome_options.add_argument('--no-sandbox')  # رفع مشکلات در محیط‌های محدود
-    chrome_options.add_argument('--disable-dev-shm-usage')  # رفع مشکلات در محیط‌های محدود
-    chrome_options.add_argument('--disable-gpu')  # غیرفعال کردن پردازش گرافیکی
-    chrome_options.add_argument('--disable-software-rasterizer')  # غیرفعال کردن رندر نرم‌افزاری
+# # تنظیمات ChromeDriver
+# chrome_options = Options()
+# chrome_options.add_argument('--headless')  # اجرای مرورگر در پس‌زمینه
+# chrome_options.add_argument('--disable-gpu')  # غیرفعال کردن GPU
+# chrome_options.add_argument('--no-sandbox')  # رفع مشکلات در محیط‌های محدود
+# chrome_options.add_argument('--disable-dev-shm-usage')  # رفع مشکلات در محیط‌های محدود
 
-    # استفاده از WebDriver برای مدیریت خودکار مرورگر
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    driver.get("https://www.cointelegraph.com/tags/nft")  # URL سایت  # باز کردن صفحه وب
+# # مسیر ChromeDriver
+# driver_path = r"C:\chromedriver-win64\chromedriver.exe"
 
-    # اضافه کردن تاخیر برای اطمینان از بارگذاری کامل صفحه
-    time.sleep(3)  # می‌توانید زمان را بیشتر کنید اگر صفحه سنگین است
+# # شروع WebDriver
+# driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
 
-    # پارس کردن محتوای صفحه با BeautifulSoup
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
+# # باز کردن صفحه مورد نظر
+# url = "https://www.cointelegraph.com/tags/nft"
+# driver.get(url)
 
-    # پیدا کردن تمامی تگ‌های <li> که دارای data-testid="posts-listing__item" هستند
-    posts = soup.find_all('li', {'data-testid': 'posts-listing__item'})
+# # انتظار برای بارگذاری کامل عنوان
+# try:
+#     title_tag = driver.find_element(By.XPATH, "//h1[contains(@class, 'tag-page__title')]")
+#     print("Page Title:", title_tag.text)
 
-    post_data = []
-    for post in posts:
-        # استخراج عنوان مقاله
-        title_tag = post.find('span', {'class': 'post-card-inline__title'})
-        title = title_tag.get_text(strip=True) if title_tag else "No title"
+#     print("Page Title:", title_tag.text)
+# except Exception as e:
+#     print("Error:", e)
 
-        # استخراج متن یا خلاصه مقاله
-        text_tag = post.find('p', {'class': 'post-card-inline__text'})
-        text = text_tag.get_text(strip=True) if text_tag else "No text available"
+# # بستن مرورگر
+# driver.quit()
 
-        # استخراج تاریخ انتشار
-        date_tag = post.find('time', {'class': 'post-card-inline__date'})
-        date = date_tag.get_text(strip=True) if date_tag else "No date"
+sample = requests.get(url= "https://cryptopotato.com/crypto-news/")
 
-        # استخراج لینک تصویر مقاله
-        image_tag = post.find('img', {'class': 'lazy-image__img'})
-        image_url = image_tag['src'] if image_tag else "No image"
+print(sample.status_code)
+if sample.status_code == 200:
+    print("success!")
+site_text = sample.text
 
-        # ذخیره داده‌ها
-        post_data.append({
-            'title': title,
-            'text': text,
-            'date': date,
-            'image_url': image_url
-        })
+soup = BeautifulSoup(site_text, "html.parser")
 
-    # بستن مرورگر
-    driver.quit()
-
-    return post_data
-
-# URL مورد نظر برای اسکراب
-url = 'https://www.cointelegraph.com/tags/nft'  # آدرس صفحه وب که می‌خواهید داده‌ها را از آن استخراج کنید
-
-# دریافت داده‌ها از صفحه
-posts = get_post_data(url)
-
-# نمایش داده‌های استخراج شده
-if posts:
-    for post in posts:
-        print(f"Title: {post['title']}")
-        print(f"Text: {post['text']}")
-        print(f"Date: {post['date']}")
-        print(f"Image URL: {post['image_url']}")
-        print('-' * 40)
+product_title = soup.find('h1', class_ ='entry-title')
+print(product_title)
