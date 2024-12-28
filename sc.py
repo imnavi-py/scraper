@@ -73,7 +73,7 @@ driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
 
 try:
     # باز کردن صفحه اصلی Google
-    driver.get("******************************")
+    driver.get("https://cointelegraph.com/markets")
 
     # یافتن باکس جستجو و ارسال متن
     # search_box = WebDriverWait(driver, 10).until(
@@ -97,10 +97,14 @@ try:
         # استخراج توضیحات (متن کوتاه)
         description = item.find_element(By.CSS_SELECTOR, ".post-card-inline__text").text
 
+        # استخراج تصویر (URL تصویر)
+        img_element = item.find_element(By.CSS_SELECTOR, ".lazy-image__img")
+        img_url = img_element.get_attribute("src")
         # چاپ اطلاعات
         print("Title:", title)
         print("Link:", link)
         print("Description:", description)
+        print("Image URL:", img_url)
         print("-" * 50)
 
 
