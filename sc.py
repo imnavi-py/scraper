@@ -73,7 +73,7 @@ driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
 
 try:
     # باز کردن صفحه اصلی Google
-    driver.get("https://cointelegraph.com/markets")
+    driver.get("********************")
 
     # یافتن باکس جستجو و ارسال متن
     # search_box = WebDriverWait(driver, 10).until(
