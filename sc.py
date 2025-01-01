@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 # تنظیمات ChromeDriver
@@ -41,33 +43,30 @@ try:
     # اضافه کردن تاخیر برای بارگذاری محتوای جدید
     time.sleep(5)
 
-    market_news_items = driver.find_elements(By.CSS_SELECTOR, ".market-news__item")
-    count = 0
-    for item in market_news_items:
-        if count >= 10:
-            break
+    # پیدا کردن تمام پست‌ها
+    posts = driver.find_elements(By.CSS_SELECTOR, ".tag-page__posts-col li")
 
-        # استخراج عنوان و لینک
-        title_element = item.find_element(By.CSS_SELECTOR, ".post-card-inline__title-link")
-        title = title_element.text
-        link = title_element.get_attribute("href")
+    # حلقه برای استخراج اطلاعات از ۱۰ رکورد اول
+    for post in posts[:10]:  # فقط اولین 10 رکورد
+        try:
+            title = post.find_element(By.CLASS_NAME, "post-card-inline__title").text
+            title_link = post.find_element(By.CLASS_NAME, "post-card-inline__title-link").get_attribute("href")
+            text = post.find_element(By.CLASS_NAME, "post-card-inline__text").text
 
-        # استخراج توضیحات (متن کوتاه)
-        description = item.find_element(By.CSS_SELECTOR, ".post-card-inline__text").text
-
-        # استخراج تصویر (URL تصویر)
-        img_element = item.find_element(By.CSS_SELECTOR, ".lazy-image__img")
-        img_url = img_element.get_attribute("src")
-
-        # چاپ اطلاعات
-        print("Title:", title)
-        print("Link:", link)
-        print("Description:", description)
-        print("Image URL:", img_url)
-        print("-" * 50)
-
-        # افزایش شمارنده
-        count += 1
+            # استفاده از WebDriverWait برای اطمینان از بارگذاری تصویر
+            image_element = WebDriverWait(post, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "lazy-image__img"))
+            )
+            image_url = image_element.get_attribute("src")
+            
+            # پرینت کردن اطلاعات
+            print("Title:", title)
+            print("Title Link:", title_link)
+            print("Text:", text)
+            print("Image URL:", image_url)
+            print("-" * 50)
+        except Exception as e:
+            print("Error:", e)
 
 finally:
     # بستن مرورگر
